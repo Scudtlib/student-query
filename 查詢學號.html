@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>查詢學號資料</title>
+</head>
+<body>
+  <h2>查詢學號</h2>
+  <input type="text" id="userIdInput" placeholder="請輸入學號">
+  <button onclick="submitQuery()">查詢</button>
+  <pre id="result"></pre>
+
+  <script>
+    async function submitQuery() {
+      const userId = document.getElementById('userIdInput').value.trim();
+      if (!userId) return alert('請輸入學號');
+
+      const response = await fetch('https://n8n5150.zeabur.app/webhook/alma-user-query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId })
+      });
+
+      const data = await response.json();
+      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
