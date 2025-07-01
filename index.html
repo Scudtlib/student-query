@@ -19,7 +19,7 @@
     }
 
     input[type="text"] {
-      width: 60%;
+      width: 300px;
       padding: 8px;
       margin-right: 10px;
       border: 1px solid #ccc;
@@ -71,6 +71,8 @@
     }
 
     .error {
+      text-align: center;
+      margin-top: 20px;
       color: #c0392b;
       font-weight: bold;
     }
@@ -80,13 +82,19 @@
   <h2>查詢學號</h2>
 
   <div style="text-align:center;">
-    <input type="text" id="userIdInput" placeholder="請輸入學號">
+    <input type="text" id="userIdInput" placeholder="請輸入學號" onkeypress="handleKey(event)">
     <button onclick="submitQuery()">查詢</button>
   </div>
 
   <div id="result" class="message">請輸入學號後點擊查詢</div>
 
   <script>
+    function handleKey(event) {
+      if (event.key === "Enter") {
+        submitQuery();
+      }
+    }
+
     async function submitQuery() {
       const userId = document.getElementById('userIdInput').value.trim();
       const result = document.getElementById('result');
@@ -104,27 +112,32 @@
 
         const data = await response.json();
 
-        // ✅ 判斷是否有實際資料（full name 也可能是 undefined）
-        if (!data || Object.keys(data).length === 0) {
-          result.className = 'message error';
-          result.innerText = '查無資料，請確認學號是否正確。';
+        // 若無資料回傳（判斷 full name 欄位為空）
+        if (!data["full name"]) {
+          result.className = 'error';
+          result.innerHTML = '查無資料，請確認學號是否正確。';
           return;
         }
+
+        // 去除 Email 前後空白與隱藏字元
+        const cleanEmail = (data.email || '')
+          .replace(/^[\s\u200B-\u200D\uFEFF]+|[\s\u200B-\u200D\uFEFF]+$/g, '');
 
         result.className = 'card';
         result.innerHTML = `
           <div class="field"><span class="label">姓名：</span><span class="value">${data["full name"] || '無資料'}</span></div>
           <div class="field"><span class="label">學院：</span><span class="value">${data.school || '無資料'}</span></div>
           <div class="field"><span class="label">學系：</span><span class="value">${data.department || '無資料'}</span></div>
-          <div class="field"><span class="label">Email：</span><span class="value">${data.email || '無資料'}</span></div>
+          <div class="field"><span class="label">Email：</span><span class="value">${cleanEmail || '無資料'}</span></div>
           <div class="field"><span class="label">狀態：</span><span class="value">${data.status || '無資料'}</span></div>
           <div class="field"><span class="label">到期日：</span><span class="value">${data.expiry_date || '無資料'}</span></div>
         `;
       } catch (err) {
-        result.className = 'message error';
+        result.className = 'error';
         result.innerText = '查詢失敗，請稍後再試。';
       }
     }
   </script>
 </body>
 </html>
+
