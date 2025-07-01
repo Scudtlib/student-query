@@ -19,7 +19,7 @@
     }
 
     input[type="text"] {
-      width: 300px;
+      width: 40%;
       padding: 8px;
       margin-right: 10px;
       border: 1px solid #ccc;
@@ -64,16 +64,10 @@
       color: #222;
     }
 
-    .message {
-      text-align: center;
-      margin-top: 20px;
-      color: #888;
-    }
-
     .error {
       text-align: center;
       margin-top: 20px;
-      color: #c0392b;
+      color: #d63031;
       font-weight: bold;
     }
   </style>
@@ -86,7 +80,7 @@
     <button onclick="submitQuery()">查詢</button>
   </div>
 
-  <div id="result" class="message">請輸入學號後點擊查詢</div>
+  <div id="result"></div>
 
   <script>
     function handleKey(event) {
@@ -112,16 +106,13 @@
 
         const data = await response.json();
 
-        // 若無資料回傳（判斷 full name 欄位為空）
         if (!data["full name"]) {
           result.className = 'error';
           result.innerHTML = '查無資料，請確認學號是否正確。';
           return;
         }
 
-        // 去除 Email 前後空白與隱藏字元
-        const cleanEmail = (data.email || '')
-          .replace(/^[\s\u200B-\u200D\uFEFF]+|[\s\u200B-\u200D\uFEFF]+$/g, '');
+        const cleanEmail = (data.email || '').replace(/^\s+|\s+$/g, '');
 
         result.className = 'card';
         result.innerHTML = `
@@ -140,4 +131,3 @@
   </script>
 </body>
 </html>
-
