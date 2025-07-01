@@ -19,7 +19,7 @@
     }
 
     input[type="text"] {
-      width: 40%;
+      width: 200px;
       padding: 8px;
       margin-right: 10px;
       border: 1px solid #ccc;
@@ -64,10 +64,16 @@
       color: #222;
     }
 
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      color: #888;
+    }
+
     .error {
       text-align: center;
       margin-top: 20px;
-      color: #d63031;
+      color: #e74c3c;
       font-weight: bold;
     }
   </style>
@@ -76,19 +82,13 @@
   <h2>查詢學號</h2>
 
   <div style="text-align:center;">
-    <input type="text" id="userIdInput" placeholder="請輸入學號" onkeypress="handleKey(event)">
+    <input type="text" id="userIdInput" placeholder="請輸入學號" onkeydown="if(event.key==='Enter')submitQuery()">
     <button onclick="submitQuery()">查詢</button>
   </div>
 
-  <div id="result"></div>
+  <div id="result" class="message"></div>
 
   <script>
-    function handleKey(event) {
-      if (event.key === "Enter") {
-        submitQuery();
-      }
-    }
-
     async function submitQuery() {
       const userId = document.getElementById('userIdInput').value.trim();
       const result = document.getElementById('result');
@@ -106,23 +106,24 @@
 
         const data = await response.json();
 
-        if (!data["full name"]) {
+        if (!data || Object.keys(data).length === 0 || !data["full name"]) {
           result.className = 'error';
-          result.innerHTML = '查無資料，請確認學號是否正確。';
+          result.innerText = '查無資料，請確認學號是否正確。';
           return;
         }
 
-        const cleanEmail = (data.email || '').replace(/^\s+|\s+$/g, '');
+        let html = '<div class="card">';
+        if (data["full name"]) html += `<div class="field"><span class="label">姓名：</span><span class="value">${data["full name"]}</span></div>`;
+        if (data.school) html += `<div class="field"><span class="label">學院：</span><span class="value">${data.school}</span></div>`;
+        if (data.department) html += `<div class="field"><span class="label">學系：</span><span class="value">${data.department}</span></div>`;
+        if (data.email?.trim()) html += `<div class="field"><span class="label">Email：</span><span class="value">${data.email.trim()}</span></div>`;
+        if (data.status) html += `<div class="field"><span class="label">狀態：</span><span class="value">${data.status}</span></div>`;
+        if (data.expiry_date) html += `<div class="field"><span class="label">到期日：</span><span class="value">${data.expiry_date}</span></div>`;
+        html += '</div>';
 
-        result.className = 'card';
-        result.innerHTML = `
-          <div class="field"><span class="label">姓名：</span><span class="value">${data["full name"] || '無資料'}</span></div>
-          <div class="field"><span class="label">學院：</span><span class="value">${data.school || '無資料'}</span></div>
-          <div class="field"><span class="label">學系：</span><span class="value">${data.department || '無資料'}</span></div>
-          <div class="field"><span class="label">Email：</span><span class="value">${cleanEmail || '無資料'}</span></div>
-          <div class="field"><span class="label">狀態：</span><span class="value">${data.status || '無資料'}</span></div>
-          <div class="field"><span class="label">到期日：</span><span class="value">${data.expiry_date || '無資料'}</span></div>
-        `;
+        result.className = '';
+        result.innerHTML = html;
+
       } catch (err) {
         result.className = 'error';
         result.innerText = '查詢失敗，請稍後再試。';
